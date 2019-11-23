@@ -14,7 +14,7 @@ val triple: (Int) -> Int = { it * 3}
  * The result of the function is another Function that Receives an A type and returns the same
  * Inside the function we apply f on the result of g(Int)
  */
-fun <A> compose(f: (A) -> A, g: (A) -> A) : (A) -> A = { f(g(it)) }
+fun <T, U, V> compose(f: (U) -> V, g: (T) -> U) : (T) -> V = { f(g(it)) }
 
 val composedFunction = compose(square, triple)
 
