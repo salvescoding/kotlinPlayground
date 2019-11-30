@@ -71,10 +71,74 @@ fun <T, U, V> higherCompose() =
     }
 println("Printing composed High order function for methods square and triple")
 
-val composedFunctionFour = higherCompose<Int, Int, Int>()(square)(triple)
+val composedFunctionFour = higherCompose<Int, Int, Int>()(square)
 
 println("Printing HOFP with composed function as a value 14")
-println(composedFunctionFour(14))
+println(composedFunctionFour(triple)(14))
 
+
+/**
+ * The reverse of the the previous HOF where we apply g(f(x))
+ */
+
+fun <T, U, V> higherAndThen() =
+    { f: (T) -> U ->
+        { g: (U) -> V ->
+            { x: T -> g(f(x)) }
+        }
+    }
+
+
+/**
+ * Passing anonymous functions ( lambdas ) to HOF
+ */
+val cosValue: Double = compose({ x: Double -> Math.PI / 2 - x }, Math::sin)(2.0)
+
+/**
+ * Partially applied curried functions
+ */
+
+// Apply the function partially to the first argument
+fun <A, B, C> partialA(a: A, f: (A) -> (B) -> C): (B) -> C =  f(a)
+
+val applyPartiallyFirstArgument = partialA<Int, Double, String>(3) { a -> { b -> " ${a.toDouble()} * $b " }  }
+println(applyPartiallyFirstArgument(2.0))
+
+// Apply the function partially to the second argument
+
+fun <A, B, C> partialB(b: B, f: (A) -> (B) -> C): (A) -> C = { a: A  -> f(a)(b)  }
+
+val applyPartiallySecondArgument = partialB<Int, Double, Double>(10.0) { a -> { b -> a.times(b) } }
+println(applyPartiallySecondArgument(5))
+
+
+// Curried function that takes 4 parameters and returns a string
+
+fun <A, B, C, D> curried(): (A) -> (B) -> (C) -> (D) -> String =
+    { a ->
+        { b ->
+            { c ->
+                { d ->
+                    "$a $b $c $d"
+                }
+            }
+        }
+    }
+
+val curriedString = curried<Int, Int, Int, Int>()
+println(curriedString(1)(2)(3)(4))
+
+fun <A, B, C> curriedAToC(f: (A, B) -> C): (A) -> (B) -> C =
+    { a -> {
+        b -> f(a, b)
+    } }
+
+val curriedAC = curriedAToC<Int, Int, Int>() { a, b -> a * b }
+println(curriedAC(10)(10))
+
+
+// swapping arguments
+fun <T, U, V> swapArgs(f: (T) -> (U) -> V): (U) -> (T) -> (V) =
+    { u -> { t -> f(t)(u) } }
 
 
