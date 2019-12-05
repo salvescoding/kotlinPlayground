@@ -50,13 +50,24 @@ println(add(23)(4))
 val composeVal: ((Int) -> Int) -> ((Int) -> Int) -> (Int) -> Int =
     { x -> { y -> { z -> x(y(z)) } } }
 
-val composedFuntionThree = composeVal(square)(triple)
+// The same as the composeVal function but defined different the signature
+val composeValNew = {
+    x: (Int) -> Int -> {
+        y: (Int) -> Int -> {
+            z: Int -> x(y(z))
+        }
+    }
+}
+val composedFuntionThree = composeVal(square)
+
+randomNumbers.map(composedFuntionThree(triple))
+
 
 println("Function composition with first triple the value 3 and then square it")
-println(composedFuntionThree(3))
+println(composedFuntionThree(triple))
 
 println("Same function composition applied to a list of numbers 3,25,12,43")
-randomNumbers.map(composedFuntionThree).forEach(::println)
+randomNumbers.map(composedFuntionThree(triple)).forEach(::println)
 
 
 /**
@@ -88,6 +99,11 @@ fun <T, U, V> higherAndThen() =
         }
     }
 
+val composedApplyFirstFunctionFirst = higherAndThen<Int, Int, Int>()(square)(triple)
+
+println("Printing high order function that applies first function first on the argument passed, 14 in this case")
+println(composedApplyFirstFunctionFirst(14))
+
 
 /**
  * Passing anonymous functions ( lambdas ) to HOF
@@ -101,7 +117,7 @@ val cosValue: Double = compose({ x: Double -> Math.PI / 2 - x }, Math::sin)(2.0)
 // Apply the function partially to the first argument
 fun <A, B, C> partialA(a: A, f: (A) -> (B) -> C): (B) -> C =  f(a)
 
-val applyPartiallyFirstArgument = partialA<Int, Double, String>(3) { a -> { b -> " ${a.toDouble()} * $b " }  }
+val applyPartiallyFirstArgument = partialA<Int, Double, String>(3) { a -> { b -> "${a.toDouble()} * $b" } }
 println(applyPartiallyFirstArgument(2.0))
 
 // Apply the function partially to the second argument
@@ -126,7 +142,9 @@ fun <A, B, C, D> curried(): (A) -> (B) -> (C) -> (D) -> String =
     }
 
 val curriedString = curried<Int, Int, Int, Int>()
+val curriedName = curried<String, String, String, String>()
 println(curriedString(1)(2)(3)(4))
+println(curriedName("Sergio")("Andre")("Alves")("Bu"))
 
 fun <A, B, C> curriedAToC(f: (A, B) -> C): (A) -> (B) -> C =
     { a -> {
@@ -136,9 +154,24 @@ fun <A, B, C> curriedAToC(f: (A, B) -> C): (A) -> (B) -> C =
 val curriedAC = curriedAToC<Int, Int, Int>() { a, b -> a * b }
 println(curriedAC(10)(10))
 
+println("Sum by double list of random numbers with apply partially second argument")
+println(randomNumbers.sumByDouble(applyPartiallySecondArgument))
 
 // swapping arguments
 fun <T, U, V> swapArgs(f: (T) -> (U) -> V): (U) -> (T) -> (V) =
     { u -> { t -> f(t)(u) } }
+
+
+
+val sumTwo: (Int) -> Int = { a -> a  + 2 }
+val multply: (Int) -> Int = { a -> a * 10}
+
+val composedSumMultiply = composeValNew(sumTwo)(multply)
+
+val composeWithFun = compose(sumTwo, multply)
+
+println(composedSumMultiply(10))
+
+
 
 
