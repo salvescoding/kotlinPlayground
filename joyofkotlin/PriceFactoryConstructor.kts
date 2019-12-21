@@ -21,4 +21,5 @@ data class PriceFactoryConstructor private constructor (private val value: Doubl
 }
 
 
+
 val newPrice = PriceFactoryConstructor(0.0)
