@@ -9,6 +9,8 @@ import java.util.*
 
 fun <T> List<T>.tail() = this.drop(1)
 fun <T> List<T>.head() = this[0]
+fun <T> prepend(list: List<T>, elem: T): List<T> = listOf(elem) + list
+
 
 fun inc(n: Int) = n + 1
 fun dec(n: Int) = n - 1
@@ -75,14 +77,6 @@ println(resultBuildString)
 
 
 
-fun <T, U> foldLeft(list: List<T>, z: U, f: (U, T) -> U): U {
-    tailrec fun foldLeft(list: List<T>, acc: U): U =
-        if (list.isEmpty())
-            acc
-        else
-            foldLeft(list.tail(), f(acc, list.head()))
-    return foldLeft(list, z)
-}
 
 fun sum(list: List<Int>) : Int = foldLeft(list, 0, Int::plus)
 
@@ -113,13 +107,29 @@ val firstInQueue = queue.remove()
 println(firstInQueue)
 
 fun <T, U> foldRight(list: List<T>, start: U, f: (U, T) -> U) : U {
-    tailrec fun foldRight_(list: List<T>,  start: U) : U =
-        if (list.isEmpty()) start else foldRight_(list.take(list.size - 1), f(start, list.last()))
+    tailrec fun foldRight_(list: List<T>, acc : U) : U =
+        if (list.isEmpty()) acc else foldRight_(list.take(list.size - 1), f(acc, list.last()))
     return foldRight_(list, start)
 }
 
+fun <T, U> foldLeft(list: List<T>, z: U, f: (U, T) -> U): U {
+    tailrec fun foldLeft(list: List<T>, acc: U): U =
+        if (list.isEmpty())
+            acc
+        else
+            foldLeft(list.tail(), f(acc, list.head()))
+    return foldLeft(list, z)
+}
 
 fun stringFoldRight(list: List<Char>) = foldRight(list, "", String::plus).capitalize()
 println("Fold right string of array ['s','e','r','g','i','o']")
 println(stringFoldRight(listOf('s','e','r','g','i','o')))
+
+
+fun <T> reverseList(list: List<T>) : List<T> {
+    return foldLeft(list,  emptyList()) { listToAdd, next -> prepend(listToAdd, next)}
+}
+
+println(reverseList(listOf('s','e','r','g','i','o')))
+
 
