@@ -9,10 +9,14 @@ import java.util.*
 
 fun <T> List<T>.tail() = this.drop(1)
 fun <T> List<T>.head() = this[0]
-fun <T> prepend(list: List<T>, elem: T): List<T> = listOf(elem) + list
 
+fun <T> prepend(list: List<T>, elem: T): List<T> = foldLeft(list, listOf(elem)) { acc, head -> acc + head }
 
-fun inc(n: Int) = n + 1
+fun <T> copy(list: List<T>) : List<T> = foldLeft(list, listOf()) { listToAdd, element -> listToAdd + element }
+
+fun lessThan(end: Int): (Int) -> Boolean = { it < end }
+
+fun inc(n: Int) = n + 2
 fun dec(n: Int) = n - 1
 
 fun add(a: Int, b: Int): Int {
@@ -40,9 +44,7 @@ println(factorial(5))
  */
 
 fun fibonacci(n: Int) : BigInteger {
-    tailrec
-    fun fib(acc: BigInteger, val2: BigInteger, x: BigInteger) : BigInteger {
-        println("fibonnaci numbers:  $val2")
+    tailrec fun fib(acc: BigInteger, val2: BigInteger, x: BigInteger) : BigInteger {
         return when {
           (x == BigInteger.ZERO) -> BigInteger.ONE
           (x == BigInteger.ONE) -> acc + val2
@@ -52,7 +54,19 @@ fun fibonacci(n: Int) : BigInteger {
     return fib(BigInteger.ZERO, BigInteger.ONE, BigInteger.valueOf(n.toLong()))
 }
 
-fibonacci(20)
+
+fun stringWithFiboNumbers(n : Int) : String {
+    tailrec fun fiboNumbers(acc: List<BigInteger>, number: Int) : String {
+        return if (number < 1) acc.joinToString(", ") else
+            fiboNumbers(prepend(acc, fibonacci(number)), number - 1)
+    }
+    return fiboNumbers(listOf(), n)
+}
+
+println(stringWithFiboNumbers(10))
+
+
+
 
 
 /**
@@ -114,9 +128,7 @@ fun <T, U> foldRight(list: List<T>, start: U, f: (U, T) -> U) : U {
 
 fun <T, U> foldLeft(list: List<T>, z: U, f: (U, T) -> U): U {
     tailrec fun foldLeft(list: List<T>, acc: U): U =
-        if (list.isEmpty())
-            acc
-        else
+        if (list.isEmpty()) acc else
             foldLeft(list.tail(), f(acc, list.head()))
     return foldLeft(list, z)
 }
@@ -126,10 +138,45 @@ println("Fold right string of array ['s','e','r','g','i','o']")
 println(stringFoldRight(listOf('s','e','r','g','i','o')))
 
 
-fun <T> reverseList(list: List<T>) : List<T> {
-    return foldLeft(list,  emptyList()) { listToAdd, next -> prepend(listToAdd, next)}
-}
+fun <T> reverseList(list: List<T>) : List<T> = foldLeft(list,  listOf(), ::prepend)
+
 
 println(reverseList(listOf('s','e','r','g','i','o')))
+
+println(prepend(listOf(), 4))
+
+// Co-recursive function
+fun <T> unfold(seed: T, f: (T) -> T, p: (T) -> Boolean): List<T> {
+    val mutableList = mutableListOf<T>()
+    var elem = seed
+    while (p(elem)) {
+        mutableList.add(elem)
+        elem = f(elem)
+    }
+    return mutableList
+}
+
+// Recursive fold function
+fun <T> unfoldRecursive(seed: T, f: (T) -> T, p: (T) -> Boolean): List<T> =
+    if (p(seed))
+        prepend(unfoldRecursive(f(seed), f, p), seed)
+    else
+        listOf()
+
+// Tailrec cursive unfold
+fun <T> tailRecUnfold(seed: T, f: (T) -> T, p: (T) -> Boolean): List<T> {
+   tailrec fun tailRecUnfold_(acc: List<T>, seed: T) : List<T> =
+        if (p(seed)) tailRecUnfold_(acc + seed, f(seed)) else acc
+    return tailRecUnfold_(listOf(), seed)
+}
+
+fun range(start: Int, end: Int) : List<Int> = tailRecUnfold(start, ::inc, lessThan(end))
+
+println(range(1,10))
+
+fun recursiveRange(start: Int, end: Int) : List<Int> = if (end <= start) listOf() else
+    prepend(recursiveRange(start + 1 , end), start)
+
+
 
 
