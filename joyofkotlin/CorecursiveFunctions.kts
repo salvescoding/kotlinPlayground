@@ -201,3 +201,27 @@ fun <T, U> map(list: List<T>, f: (T) -> U) : List<U> =
 val newMapped = map(listOf(1,2,3,4)) { it.toDouble() }
 
 println(newMapped)
+
+listOf(1,2,3,4).fold(listOf<Double>()) { acc, i ->  acc + i.toDouble() }
+
+val  increasePair: (Pair<BigInteger, BigInteger>) -> Pair<BigInteger, BigInteger> = { Pair(it.second, it.first + it.second) }
+
+fun fiboCoRecursive(n: Int) : String {
+    tailrec fun fiboRecursive(pair: Pair<BigInteger, BigInteger>, list: List<Pair<BigInteger,BigInteger>>, limit: Int) : String {
+        return if (limit < 1) {
+            list.map { it.first }.joinToString(",")
+        } else {
+            fiboRecursive(increasePair(pair), list + pair, limit - 1)
+        }
+    }
+    return fiboRecursive(Pair(BigInteger.ZERO, BigInteger.ONE), listOf(), n)
+}
+
+fun fiboCoRecursiveReUse(n: Int) : String {
+    val seed = Pair(BigInteger.ONE, BigInteger.ONE)
+    val listOfPairs = iterate(seed, increasePair, n)
+    return listOfPairs.map { it.first }.joinToString(",")
+}
+
+println("List of fibonnaci sequence numbers until x number")
+println(fiboCoRecursiveReUse(10))
