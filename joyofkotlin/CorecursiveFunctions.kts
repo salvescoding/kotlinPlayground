@@ -14,7 +14,7 @@ fun <T> prepend(list: List<T>, elem: T): List<T> = foldLeft(list, listOf(elem)) 
 
 fun <T> copy(list: List<T>) : List<T> = foldLeft(list, listOf()) { listToAdd, element -> listToAdd + element }
 
-fun lessThan(end: Int): (Int) -> Boolean = { it < end }
+fun  lessThan(): (Int) -> (Int) -> Boolean = { limit -> { element -> element < limit }  }
 
 fun inc(n: Int) = n + 2
 fun dec(n: Int) = n - 1
@@ -170,13 +170,34 @@ fun <T> tailRecUnfold(seed: T, f: (T) -> T, p: (T) -> Boolean): List<T> {
     return tailRecUnfold_(listOf(), seed)
 }
 
-fun range(start: Int, end: Int) : List<Int> = tailRecUnfold(start, ::inc, lessThan(end))
+fun range(start: Int, end: Int) : List<Int> = tailRecUnfold(start, ::inc, lessThan()(end))
 
 println(range(1,10))
 
 fun recursiveRange(start: Int, end: Int) : List<Int> = if (end <= start) listOf() else
     prepend(recursiveRange(start + 1 , end), start)
 
+println(recursiveRange(1, 20))
 
+/**
+ * Exercise 4.16 The Joy of Kotlin
+ */
 
+fun <T> iterate(seed: T, f: (T) -> T, times: Int): List<T> {
+    tailrec fun iterate_(acc: List<T>, seed: T): List<T> =
+        if (acc.size < times)
+            iterate_(acc + seed, f(seed))
+        else
+            acc
+    return iterate_(listOf(), seed)
+}
 
+/**
+ * Map function using foldLeft for abstracting tailrecursion
+ */
+fun <T, U> map(list: List<T>, f: (T) -> U) : List<U> =
+    foldLeft(list, listOf()) { acc, ele -> acc + f(ele) }
+
+val newMapped = map(listOf(1,2,3,4)) { it.toDouble() }
+
+println(newMapped)
