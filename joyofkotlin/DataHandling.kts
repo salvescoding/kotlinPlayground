@@ -1,5 +1,7 @@
 package joyofkotlin
 
+import joyofkotlin.DataHandling.List.Companion.drop
+import joyofkotlin.DataHandling.List.Companion.dropWhile
 import java.lang.IllegalStateException
 
 
@@ -8,22 +10,16 @@ sealed class List<A> {
 
     abstract fun isEmpty(): Boolean
 
-    fun cons(a: A) : List<A> = Cons(a, this)
+    fun addToStart(a: A) : List<A> = Cons(a, this)
 
-    fun setHead(a: A) :List<A> = when(this) {
+    fun setNewHead(a: A) :List<A> = when(this) {
         is Nil -> throw IllegalStateException("Cannot set head on empty list")
         is Cons -> Cons(a, this.tail)
     }
 
-    fun drop(n: Int): List<A> {
-        tailrec fun drop(n: Int, list: List<A>): List<A> {
-            return if (n <= 0) list else when (list) {
-                is Cons -> drop(n - 1, list.tail)
-                is Nil -> list
-            }
-        }
-        return drop(n, this)
-    }
+    fun dropWhile(predicate: (A) -> Boolean): List<A> = dropWhile(this, predicate)
+
+    fun drop(n: Int): List<A> = drop(n, this)
 
     private object Nil : List<Nothing>() {
         override fun isEmpty() = true
@@ -50,14 +46,39 @@ sealed class List<A> {
         az.foldRight(Nil as List<A>) { a: A, list: List<A> ->
             Cons(a, list)
         }
+
+        private tailrec fun <A> drop(n: Int, list: List<A>): List<A> {
+            return if (n <= 0) list else when (list) {
+                is Cons -> drop(n - 1, list.tail)
+                is Nil -> list
+            }
+        }
+
+        private tailrec fun <A> dropWhile(list: List<A>, predicate: (A) -> Boolean): List<A> = when(list) {
+                is Nil -> list
+                is Cons -> if (predicate(list.head)) dropWhile(list.tail, predicate) else list
+        }
+
+
+
     }
 }
 
 val funkyList = List(1,3,4,5)
+println("Original List: $funkyList")
 
-val dropped2Values = funkyList.drop(2)
+println("Dropping first x elements from the list with creating new elements: ")
+println(funkyList.drop(2))
 
-println(dropped2Values)
+println("Set new head on the original list without creating new list")
+println(funkyList.setNewHead(2))
 
 
+println("Adding new element to start of the list without creating new list")
+println(funkyList.addToStart(1))
 
+//println("Printing orignal list")
+//println(funkyList)
+
+println("Drop while condition is met")
+println(funkyList.dropWhile { it % 3 != 0})
