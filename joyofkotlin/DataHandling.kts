@@ -21,6 +21,10 @@ sealed class List<A> {
 
     fun drop(n: Int): List<A> = drop(n, this)
 
+    fun init(): List<A> = reverse().drop(1).reverse()
+
+    fun reverse(): List<A> = reverse(invoke(), this)
+
     private object Nil : List<Nothing>() {
         override fun isEmpty() = true
         override fun toString(): String = "[NIL]"
@@ -59,6 +63,13 @@ sealed class List<A> {
                 is Cons -> if (predicate(list.head)) dropWhile(list.tail, predicate) else list
         }
 
+        private tailrec fun <A> reverse(acc: List<A>,list: List<A>) : List<A> =
+            when (list) {
+                is Nil -> acc
+                is Cons -> reverse(acc.addToStart(list.head), list.tail)
+            }
+
+
 
 
     }
@@ -82,3 +93,7 @@ println(funkyList.addToStart(1))
 
 println("Drop while condition is met")
 println(funkyList.dropWhile { it % 3 != 0})
+
+
+println("Dropping the last element of the list")
+println(funkyList.init())
