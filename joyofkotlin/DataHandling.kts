@@ -1,17 +1,13 @@
 package joyofkotlin
 
-//
-//tailrec fun sum(list: List<Int>) : Int =
-//    when(list) {
-//        is Nil -> 0
-//        is Cons -> list.head + sum(list.tail)
-//    }
 
 
 @Suppress("UNCHECKED_CAST")
 sealed class List<out A> {
 
     abstract fun isEmpty(): Boolean
+
+    fun cons(a: @UnsafeVariance A):List<A> = Cons(a, this)
 
     fun addToStart(a: @UnsafeVariance A) : List<A> = Cons(a, this)
 
