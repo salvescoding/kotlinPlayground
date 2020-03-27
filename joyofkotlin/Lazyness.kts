@@ -10,6 +10,18 @@ class Lazy<out A>(function: () -> A): () -> A {
     private val value: A by lazy(function)
 
     override operator fun invoke(): A = value
+
+    companion object {
+        val lift2: ((String) -> (String) -> String) -> (Lazy<String>) ->
+            (Lazy<String>) -> Lazy<String> =
+            { f ->
+                { lz1 ->
+                    { lz2 ->
+                        Lazy { f(lz1())(lz2()) }
+                    }
+                }
+            }
+    }
 }
 
 
